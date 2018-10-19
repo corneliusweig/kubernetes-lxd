@@ -1,0 +1,88 @@
+apiVersion: v1
+data:
+  index.html: |-
+    <html>
+      <head/>
+      <body><h1>Hi from LXC</h1></body>
+    </html>
+kind: ConfigMap
+metadata:
+  name: index-html
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: test-app
+  name: test-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-app
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: test-app
+    spec:
+      containers:
+      - image: nginx
+        imagePullPolicy: IfNotPresent
+        name: nginx
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /usr/share/nginx/html/
+          name: index-html
+      terminationGracePeriodSeconds: 2
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: index-html
+        name: index-html
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: test-app
+  name: test-app
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: http
+  selector:
+    app: test-app
+  type: ClusterIP
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  labels:
+    app: example
+  name: test-app
+spec:
+  rules:
+  - host: k8s-lxc
+    http:
+      paths:
+      - backend:
+          serviceName: test-app
+          servicePort: http
+        path: /
+  tls:
+  - hosts:
+    - k8s-lxc
+    secretName: k8s-lxc

@@ -277,6 +277,20 @@ Congratulations, if the last command worked, you now have kubernetes running in 
 4. (Optional) Secure access to your cluster by creating a user with edit rights.
    Use the script `src/setup-default-user.sh` to set up authentication by client certificate for a user with name `default-user`.
 
+5. Check if everything is running correctly by deploying a small test application
+   ```bash
+   kubectl apply -f src/test-app.yaml
+   ```
+   You should be able to access the application from your browser [http://k8s-lxc](http://k8s-lxc).
+
+   If that does not work, try to access the test service from within your kubernetes network.
+   ```bash
+   $ kubectl run --generator=run-pod/v1 -ti --image nicolaka/netshoot curl
+   > curl test # should fetch a minimal greeting
+   Ctrl-D
+   $ kubectl delete pod curl
+   ```
+
 ## Useful command for working with your LXC container
 
 - Start your lxc container with `lxc start k8s-lxc`
