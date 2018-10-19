@@ -59,6 +59,7 @@ To use it, install lxd and initialize it using `lxd init`. When prompted, answer
 Below, some commands will need to be executed inside the lxc container and others on the host.
 - **$**-prefix means to be executed on the host machine
 - **@**-prefix means to be executed inside the lxc container
+- no prefix means it does not matter where the command is executed
 
 1. First ensure on your host system that `$ cat /proc/sys/net/bridge/bridge-nf-call-iptables` returns 1.
    This is required by kubernetes but cannot be validated inside the lxc container.
@@ -194,4 +195,94 @@ Congratulations, if the last command worked, you now have kubernetes running in 
    kubectl edit node
    ```
    and remove the taint.
+
+
+## Kubernetes fine-tuning
+
+1. If needed, configure an ingress controller for your kubernetes installation
+
+   -  Create the ingress controller
+
+      ```bash
+      kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/mandatory.yaml
+      kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/provider/cloud-generic.yaml
+      ```
+
+   - To access the ingress via the default http/https ports, add `hostPort` directives to its deployment template.
+     Run `kubectl edit -n ingress-nginx deployment nginx-ingress-controller` and change the port definitions to
+     ```yaml
+     ports:
+     - containerPort: 80
+       hostPort: 80
+       name: http
+       protocol: TCP
+     - containerPort: 443
+       hostPort: 443
+       name: https
+       protocol: TCP
+     ```
+
+2. Disable leader election for control plane components, because this it is obsolete for a single node deployment.
+   ```bash
+   sed -i 's/--leader-elect=true/--leader-elect=false/' /etc/kubernetes/manifests/{kube-controller-manager.yaml,kube-scheduler.yaml}
+   ```
+
+3. (Optional) Create an SSL certificate for your lxc container to secure traffic
+
+   - Follow the instructions from [kubernetes.io](https://kubernetes.io/docs/tasks/tls/managing-tls-in-a-cluster/).
+     Using the following commands:
+   
+     ```bash
+     # prepare certificate signing request
+     cat <<EOF | cfssl genkey - | cfssljson -bare server
+     {
+        "hosts": [
+           "k8s-lxc"
+        ],
+        "CN": "k8s-lxc",
+        "key": {
+          "algo": "ecdsa",
+          "size": 256
+        }
+     }
+     EOF
+
+     # create certificate signing request
+     cat <<EOF | kubectl create -f -
+     apiVersion: certificates.k8s.io/v1beta1
+     kind: CertificateSigningRequest
+     metadata:
+       name: k8s-lxc-csr
+     spec:
+       groups:
+       - system:authenticated
+       request: $(cat server.csr | base64 | tr -d '\n')
+       usages:
+       - digital signature
+       - key encipherment
+       - server auth
+     EOF
+
+     # approve the certificate, using the k8s cluster ca.pem
+     kubectl certificate approve k8s-lxc-csr
+
+     # retrieve the server certificate
+     kubectl get csr k8s-lxc-csr -o jsonpath='{.status.certificate}' \
+         | base64 --decode > server.crt
+
+     # create tls secret
+     kubectl create secret tls k8s-lxc --cert=server.crt --key=server-key.pem
+     ```
+
+## Useful command for working with your LXC container
+
+- Start your lxc container with `lxc start k8s-lxc`
+- Show your running container with its IP `lxc list`
+- Open a privileged shell in your container with `lxc exec k8s-lxc /bin/bash`
+
+
+## References
+- https://blog.ubuntu.com/2017/02/20/running-kubernetes-inside-lxd
+- https://medium.com/@kvapss/run-kubernetes-in-lxc-container-f04aa94b6c9c
+
 
