@@ -29,8 +29,8 @@ To use it, install lxd and initialize it using `lxd init`. When prompted, answer
 
 0. Before you can fire up your lxc container, you have to make sure to create `/etc/subuid` and `/etc/subgid` with the following entries:
 
-    root:1000000:1000000000
-    <youruserid>:1000000:1000000000
+       root:1000000:1000000000
+       <youruserid>:1000000:1000000000
 
 1. As the base system for our kubernetes we will use Debian and call the lxc machine `k8s-lxc`. Now create your kubernetes host machine with
 
@@ -224,7 +224,8 @@ Congratulations, if the last command worked, you now have kubernetes running in 
 
 2. Disable leader election for control plane components, because this it is obsolete for a single node deployment.
    ```bash
-   sed -i 's/--leader-elect=true/--leader-elect=false/' /etc/kubernetes/manifests/{kube-controller-manager.yaml,kube-scheduler.yaml}
+   sed -i 's/--leader-elect=true/--leader-elect=false/' \
+      /etc/kubernetes/manifests/{kube-controller-manager.yaml,kube-scheduler.yaml}
    ```
 
 3. (Optional) Create an SSL certificate for your lxc container to secure traffic
