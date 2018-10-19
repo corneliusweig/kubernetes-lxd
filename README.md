@@ -107,3 +107,91 @@ Below, some commands will need to be executed inside the lxc container and other
 
 Congratulations, if the last command worked, you now have kubernetes running in your lxc container.
 
+## Configure the host for working with k8s-lxc
+
+1. On your host machine, add a host entry to access your `k8s-lxc` container by DNS name.
+   Find out the IP of your lxc container by running `$ lxc list k8s-lxc`.
+   Add its IP in `/etc/hosts`
+   ```/etc/hosts
+   <k8s-lxc-ip>   k8s-lxc
+   ```
+   After that, it should be possible to ping the container with `ping k8s-lxc`.
+
+2. Make your docker daemon in the lxc cluster available from your host.
+   There are two options.
+   - **insecure** without authentication
+
+     Open docker in the lxc container so that it can be accessed from outside. Run
+     ```bash
+     @ systemctl edit docker.service
+     ```
+     and add the following lines:
+     ```systemd
+     [Service]
+     ExecStart=
+     ExecStart=/usr/bin/dockerd -H fd:// -H tcp://0.0.0.0:2376
+     ```
+     This is necessary, because the default unit definition also defines a host address, so that it cannot be overridden by the configuration file.
+
+     On your host machine, you can then talk to this docker daemon by setting the environment variable
+     ```bash
+     $ export DOCKER_HOST="tcp://k8s-lxc:2376"
+     $ docker ps   # should show some kubernetes infrastructure containers
+     ```
+
+   - **secure** with authentication
+
+      1. In your lxc container, change into folder `/etc/docker`.
+         Follow the instructions from [docker.com](https://docs.docker.com/engine/security/https/) to set up server and client credentials.
+      2. Then create a `/etc/docker/daemon.json` with the following content:
+          ```json
+          @ cat <<-EOF > /etc/docker/daemon.json
+          {
+             "tls": true,
+             "tlscacert": "/etc/docker/ca.pem",
+             "tlscert": "/etc/docker/server-cert.pem",
+             "tlskey": "/etc/docker/server-key.pem",
+             "hosts": ["fd://", "tcp://0.0.0.0:2376"]
+          }
+          EOF
+          ```
+      3. Edit your `docker.service` unit by running `@ systemctl edit docker.service` and add/change the following:
+          ```systemd
+          [Service]
+          ExecStart=
+          ExecStart=/usr/bin/dockerd
+          ```
+         This is necessary, because the default unit definition also defines a host address, so that it cannot be overridden by the configuration file.
+
+      4. Pull the certificate and client keys to a config directory
+         ```bash
+         $ mkdir ~/.docker-lxc && cd ~/.docker-lxc
+         $ lxc file pull k8s-lxc/etc/docker/ca.pem .
+         $ lxc file pull k8s-lxc/etc/docker/cert.pem .
+         $ lxc file pull k8s-lxc/etc/docker/key.pem .
+         ```
+         If you do not plan to use docker on your host as well, you can also use the default docker config directory `~/.docker/`.
+
+      5. Set the following environment variables to access the docker daemon in the lxc cluster
+         ```bash
+         export DOCKER_TLS_VERIFY="1"
+         export DOCKER_CERT_PATH="~/.docker-lxc/"
+         export DOCKER_HOST="tcp://k8s-lxc:2376"
+         export DOCKER_API_VERSION="1.37"
+         ```
+3. Set up a kubectl context on your host system to talk to your kubernetes installation in the lxc container:
+   ```bash
+   $ lxc file pull k8s-lxc/etc/kubernetes/admin.conf .
+   $ KUBECONFIG=~/.kube/config:admin.conf kubectl config view > config.tmp
+   $ mv config.tmp ~/.kube/config
+   $ kubectl config use-context k8s-lxc-admin@k8s-lxc
+   ```
+   The second line does some magic to merge the admin access credentials into the existing `KUBECONFIG` file.
+
+4. Prior to `kubeadm-1.12` the master node gets a taint which prevents non-system pods from being scheduled.
+   If this applies to you, remove the taint, do
+   ```bash
+   kubectl edit node
+   ```
+   and remove the taint.
+
