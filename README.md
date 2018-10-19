@@ -274,6 +274,8 @@ Congratulations, if the last command worked, you now have kubernetes running in 
      # create tls secret
      kubectl create secret tls k8s-lxc --cert=server.crt --key=server-key.pem
      ```
+4. (Optional) Secure access to your cluster by creating a user with edit rights.
+   Use the script `src/setup-default-user.sh` to set up authentication by client certificate for a user with name `default-user`.
 
 ## Useful command for working with your LXC container
 
