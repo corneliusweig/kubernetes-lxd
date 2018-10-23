@@ -93,6 +93,7 @@ Below, some commands will need to be executed inside the lxc container and other
    @ kubeadm alpha phase addons all
    ```
    For the first command you need to ignore the `bridge-nf-call-iptables` check which you have done manually before.
+   In case you obtain an error like `failed to parse kernel config` in the preflight check, copy your host kernel config to from `/boot` to your lxc-guest `/boot`.
 
 4. Disable the software container network infrastructure, because it is not needed for a dev environment:
    ```bash
