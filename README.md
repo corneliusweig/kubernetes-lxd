@@ -55,6 +55,22 @@ To use it, install lxd and initialize it using `lxd init`. When prompted, answer
 
 3. Restart your lxc container. Unfortunately, `lxc stop k8s-lxc` does not work for me. I need to do `lxc exec k8s-lxc reboot`.
 
+### Using docker and kubernetes on zfs backed host systems
+
+If your host system is backed by ZFS storage (e.g. an option for Proxmox), some adaption need to be made. ZFS currently lacks full namespace support an thus a dataset cannot be reached into a LXC container retaining full control over the child datasets. The easiest solution is to create two volumes for `/var/lib/docker` and `/var/lib/kubelet` and format these ext4.
+
+    zfs create -V 50G mypool/my-dockervol
+    zfs create -V 5G mypool/my-kubeletvol
+    mkfs.ext4 /dev/zvol/mypool/my-dockervol
+    mkfs.ext4 /dev/zvol/mypool/my-kubeletvol
+    
+One then just needs to reach in the two volumes at the right location. The configuration for Proxmox looks like this:
+
+    ...
+    mp0: /dev/zvol/mypool/my-dockervol,mp=/var/lib/docker,backup=0
+    mp1: /dev/zvol/mypool/my-kubeletvol,mp=/var/lib/kubelet,backup=0
+    ...
+
 ## Installing kubernetes in the lxc container
 Below, some commands will need to be executed inside the lxc container and others on the host.
 - **$**-prefix means to be executed on the host machine
