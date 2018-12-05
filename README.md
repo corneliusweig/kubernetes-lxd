@@ -107,7 +107,6 @@ Below, some commands will need to be executed inside the lxc container and other
 3. Configure the kubelet in the lxc container:
    ```bash
    @ kubeadm init --ignore-preflight-errors=FileContent--proc-sys-net-bridge-bridge-nf-call-iptables
-   @ kubeadm alpha phase addons all
    ```
    For the first command you need to ignore the `bridge-nf-call-iptables` check which you have done manually before.
    In case you obtain an error like `failed to parse kernel config` in the preflight check, copy your host kernel config to from `/boot` to your lxc-guest `/boot`.
@@ -201,7 +200,7 @@ Congratulations, if the last command worked, you now have kubernetes running in 
 3. Set up a kubectl context on your host system to talk to your kubernetes installation in the lxc container:
    ```bash
    $ lxc file pull k8s-lxc/etc/kubernetes/admin.conf .
-   $ KUBECONFIG=~/.kube/config:admin.conf kubectl config view > config.tmp
+   $ KUBECONFIG=~/.kube/config:admin.conf kubectl config view --raw > config.tmp
    $ mv config.tmp ~/.kube/config
    $ kubectl config use-context k8s-lxc-admin@k8s-lxc
    ```
