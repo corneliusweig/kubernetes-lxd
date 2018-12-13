@@ -206,8 +206,8 @@ Congratulations, if the last command worked, you now have kubernetes running in 
    ```
    The second line does some magic to merge the admin access credentials into the existing `KUBECONFIG` file.
 
-4. Prior to `kubeadm-1.12` the master node gets a taint which prevents non-system pods from being scheduled.
-   If this applies to you, remove the taint, do
+4. Kubeadm usually taints the master node which prevents non-system pods from being scheduled.
+   If this applies to you, do
    ```bash
    kubectl edit node
    ```
