@@ -32,6 +32,8 @@ To use it, install lxd and initialize it using `lxd init`. When prompted, answer
        root:1000000:1000000000
        <youruserid>:1000000:1000000000
 
+Run `systemctl restart lxd` to have LXD detect your new maps.
+
 1. As the base system for our kubernetes we will use Debian and call the lxc machine `k8s-lxc`. Now create your kubernetes host machine with
 
        lxc launch images:debian/stretch k8s-lxc
