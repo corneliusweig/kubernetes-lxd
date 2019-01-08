@@ -14,13 +14,13 @@ Lxc is similar to docker but aims more to be an OS container instead of just app
 To use it, install lxd and initialize it using `lxd init`. When prompted, answer the following questions:
 
   - Would you like to use LXD clustering? (yes/no) [default=no]:        
-  - Do you want to configure a new storage pool? (yes/no) [default=yes]: yes -> default location
+  - Do you want to configure a new storage pool? (yes/no) [default=yes]: yes -> **dir** (any directory based provider should work)
   - Would you like to connect to a MAAS server? (yes/no) [default=no]:  
   - Would you like to create a new local network bridge? (yes/no) [default=yes]:
   - What should the new bridge be called? [default=lxdbr0]:             
   - What IPv4 address should be used? (CIDR subnet notation, “auto” or “none”) [default=auto]:
   - What IPv6 address should be used? (CIDR subnet notation, “auto” or “none”) [default=auto]:
-  - Would you like LXD to be available over the network? (yes/no) [default=no]: no
+  - Would you like LXD to be available over the network? (yes/no) [default=no]: **no**
   - Would you like stale cached images to be updated automatically? (yes/no) [default=yes]     
   - Would you like a YAML "lxd init" preseed to be printed? (yes/no) [default=no]:
 
@@ -151,6 +151,11 @@ Congratulations, if the last command worked, you now have kubernetes running in 
      ```
      This is necessary, because the default unit definition also defines a host address, so that it cannot be overridden by the configuration file.
 
+     Restart docker in the lxc container, so that the changes take effect. Run
+     ```bash
+     @ systemctl restart docker.service
+     ```
+
      On your host machine, you can then talk to this docker daemon by setting the environment variable
      ```bash
      $ export DOCKER_HOST="tcp://k8s-lxc:2376"
@@ -204,7 +209,7 @@ Congratulations, if the last command worked, you now have kubernetes running in 
    $ mv config.tmp ~/.kube/config
    $ kubectl config use-context k8s-lxc-admin@k8s-lxc
    ```
-   The second line does some magic to merge the admin access credentials into the existing `KUBECONFIG` file.
+    The second line does some magic to merge the admin access credentials into the existing `KUBECONFIG` file.
 
 4. Kubeadm usually taints the master node which prevents non-system pods from being scheduled.
    If this applies to you, do
