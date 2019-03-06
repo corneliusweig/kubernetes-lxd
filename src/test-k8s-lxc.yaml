@@ -1,9 +1,20 @@
 apiVersion: v1
 data:
+  # language=html
   index.html: |-
-    <html>
-      <head/>
-      <body><h1>Hi from LXC</h1></body>
+    <html lang="en">
+      <head>
+       <title>k8s in lxc</title>
+       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+      </head>
+      <body>
+       <div class="container">
+        <div class="jumbotron">
+         <div class="page-header"><h1>Hi from LXC</h1></div>
+         <h3>You are running kubernetes via <a href="https://github.com/kubernetes/kubeadm">kubeadm</a></h3>
+        </div>
+       </div>
+      </body>
     </html>
 kind: ConfigMap
 metadata:

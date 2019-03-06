@@ -40,6 +40,11 @@ To use it, install lxd and initialize it using `lxd init`. When prompted, answer
 
    Run `lxc list` to ensure that your machine `k8s-lxc` is up and running.
 
+   Note: To get an overview over the supported base images, run
+
+       lxc image list images:
+
+
 2. Usual lxc containers are quite restricted in their capabilities.
    Because we need to run docker and kubernetes in the lxc container, it is required to give the container the capabilities to manage networking configuration and create cgroups.
    For that, run `lxc config edit k8s-lxc` and merge in the following settings:
@@ -303,7 +308,7 @@ Congratulations, if the last command worked, you now have kubernetes running in 
 
 5. Check if everything is running correctly by deploying a small test application
    ```bash
-   kubectl apply -f src/test-app.yaml
+   kubectl apply -f src/test-k8s-lxc.yaml
    ```
    You should be able to access the application from your browser [http://k8s-lxc](http://k8s-lxc).
 
