@@ -137,7 +137,7 @@ Below, some commands will need to be executed inside the lxc container and other
 
 3. (Optional) Check if everything is running correctly by deploying a small test application
    ```bash
-   kubectl apply -f src/test-app.yaml
+   kubectl apply -f src/test-k3s-lxc.yaml
    ```
    You should be able to access the application from your browser [http://k3s-lxc](http://k3s-lxc).
 
