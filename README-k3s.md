@@ -76,7 +76,7 @@ Below, some commands will need to be executed inside the lxc container and other
    ```
 2. Pull `k3s` on your host system, and push it into the container:
    ```bash
-   $ curl -Lo k3s https://github.com/rancher/k3s/releases/download/v0.2.0/k3s
+   $ curl -Lo k3s https://github.com/rancher/k3s/releases/download/v0.1.0/k3s
    $ chmod +x k3s
    $ lxc file push k3s k3s-lxc/usr/local/bin/k3s
    ```
