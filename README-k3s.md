@@ -89,11 +89,11 @@ Below, some commands will need to be executed inside the lxc container and other
 
 3. Restart your lxc container with
    ```bash
-   lxc restart k3s-lxc
+   $ lxc restart k3s-lxc
    ```
    If this does not work, try the hard way
    ```bash
-   lxc exec k3s-lxc reboot
+   $ lxc exec k3s-lxc reboot
    ```
 
 3. Now it is time to try out if `k3s` runs in your container:
