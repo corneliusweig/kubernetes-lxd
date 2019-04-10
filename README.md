@@ -230,12 +230,21 @@ Congratulations, if the last command worked, you now have kubernetes running in 
 
 1. If needed, configure an ingress controller for your kubernetes installation
 
-   -  Create the ingress controller
+   - Ensure that IP forwarding is enabled on your host
+     ```bash
+     sysctl net.ipv4.ip_forward
+     ```
+     or enable it permanently with
+     ```bash
+     sysctl -w net.ipv4.ip_forward=1
+     ```
 
-      ```bash
-      kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/mandatory.yaml
-      kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/provider/cloud-generic.yaml
-      ```
+   - Create the ingress controller
+
+     ```bash
+     kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/mandatory.yaml
+     kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/provider/cloud-generic.yaml
+     ```
 
    - To access the ingress via the default http/https ports, add `hostPort` directives to its deployment template.
      Run `kubectl edit -n ingress-nginx deployment nginx-ingress-controller` and change the port definitions to
