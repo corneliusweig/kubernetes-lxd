@@ -340,4 +340,5 @@ Congratulations, if the last command worked, you now have kubernetes running in 
 - https://blog.ubuntu.com/2017/02/20/running-kubernetes-inside-lxd
 - https://medium.com/@kvapss/run-kubernetes-in-lxc-container-f04aa94b6c9c
 
+You might also like [github.com/charmed-kubernetes/bundle/wiki/Deploying-on-LXD](https://github.com/charmed-kubernetes/bundle/wiki/Deploying-on-LXD)
 
