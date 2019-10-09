@@ -76,7 +76,7 @@ Below, some commands will need to be executed inside the lxc container and other
    ```
 2. Pull `k3s` on your host system, and push it into the container:
    ```bash
-   $ curl -Lo k3s https://github.com/rancher/k3s/releases/download/v0.1.0/k3s
+   $ curl -Lo k3s https://github.com/rancher/k3s/releases/download/v0.9.1/k3s
    $ chmod +x k3s
    $ lxc file push k3s k3s-lxc/usr/local/bin/k3s
    ```
@@ -86,6 +86,12 @@ Below, some commands will need to be executed inside the lxc container and other
    @ apt-get install -y ca-certificates
    ```
    If you skip this, image pulling will not work due to certificate validation errors.
+
+2. Newer versions of k3s want to read from `/dev/kmsg` which is not present in the container.
+   You need to instruct systemd to always create a symlink to `/dev/console` instead:
+   ```bash
+   @ echo 'L /dev/kmsg - - - - /dev/console' > /etc/tmpfiles.d/kmsg.conf
+   ```
 
 3. Restart your lxc container with
    ```bash
@@ -108,7 +114,7 @@ Below, some commands will need to be executed inside the lxc container and other
    ```
    @ systemctl edit --force --full k3s.service
    ```
-   and paste the the content of the [`k3s` unit file](https://github.com/rancher/k3s/blob/master/k3s.service)
+   and paste the the content of the [`k3s` unit file](https://github.com/rancher/k3s/blob/master/k3s.service) and remove the `EnvironmentFile` line.
    Finally, enable the unit with
    ```
    @ systemctl enable k3s
@@ -128,7 +134,7 @@ Below, some commands will need to be executed inside the lxc container and other
 2. Set up a kubectl context on your host system to talk to your `k3s` installation in the lxc container:
    ```bash
    $ lxc file pull k3s-lxc/etc/rancher/k3s/k3s.yaml .
-   $ sed -i 's:localhost:k3s-lxc:;s:default:k3s-lxc:g' k3s.yaml
+   $ sed -i 's:127.0.0.1:k3s-lxc:;s:default:k3s-lxc:g' k3s.yaml
    $ KUBECONFIG=~/.kube/config:k3s.yaml kubectl config view --raw > config.tmp
    $ mv config.tmp ~/.kube/config
    $ kubectl config use-context k3s-lxc
