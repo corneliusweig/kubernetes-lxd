@@ -120,6 +120,7 @@ Below, some commands will need to be executed inside the lxc container and other
 4. Configure the kubelet in the lxc container:
    ```bash
    @ kubeadm init --ignore-preflight-errors=FileContent--proc-sys-net-bridge-bridge-nf-call-iptables
+   @ kubeadm init phase addon all
    ```
    For the first command you need to ignore the `bridge-nf-call-iptables` check which you have done manually before.
    In case you obtain an error like `failed to parse kernel config` in the preflight check, copy your host kernel config to from `/boot` to your lxc-guest `/boot`.
