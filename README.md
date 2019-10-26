@@ -97,7 +97,13 @@ Below, some commands will need to be executed inside the lxc container and other
    After that, verify that `@ conntrack` also works inside your lxc container.
    To enter your container as root, do `$ lxc exec k8s-lxc /bin/bash`.
 
-2. Install docker and kubernetes runtime in the lxc container.
+2. Recent kubernetes versions want to read from `/dev/kmsg` which is not present in the container.
+   You need to instruct systemd to always create a symlink to `/dev/console` instead:
+   ```bash
+   @ echo 'L /dev/kmsg - - - - /dev/console' > /etc/tmpfiles.d/kmsg.conf
+   ```
+
+3. Install docker and kubernetes runtime in the lxc container.
    The following commands add the required repositories, install kubernetes with dependencies, and pin the kubernetes & docker version:
 
    ```bash
@@ -111,21 +117,21 @@ Below, some commands will need to be executed inside the lxc container and other
    @ apt-mark hold kubelet kubeadm kubectl docker-ce
    ```
    Note: newer versions of docker require `/lib/modules` from the host to be mounted, so we use an older version here.
-3. Configure the kubelet in the lxc container:
+4. Configure the kubelet in the lxc container:
    ```bash
    @ kubeadm init --ignore-preflight-errors=FileContent--proc-sys-net-bridge-bridge-nf-call-iptables
    ```
    For the first command you need to ignore the `bridge-nf-call-iptables` check which you have done manually before.
    In case you obtain an error like `failed to parse kernel config` in the preflight check, copy your host kernel config to from `/boot` to your lxc-guest `/boot`.
 
-4. Disable the software container network infrastructure, because it is not needed for a dev environment:
+5. Disable the software container network infrastructure, because it is not needed for a dev environment:
    ```bash
    @ sed -i 's/--network-plugin=cni //' /var/lib/kubelet/kubeadm-flags.env
    @ systemctl daemon-reload
    @ systemctl restart kubelet
    ```
 
-5. (Optional) Reduce the replica count of the coreDNS service to 1.
+6. (Optional) Reduce the replica count of the coreDNS service to 1.
    ```bash
    @ kubectl scale -n kube-system deployment --replicas 1 coredns
    ```
