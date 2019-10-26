@@ -249,8 +249,7 @@ Congratulations, if the last command worked, you now have kubernetes running in 
    - Create the ingress controller
 
      ```bash
-     kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/mandatory.yaml
-     kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/provider/cloud-generic.yaml
+     kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/mandatory.yaml
      ```
 
    - To access the ingress via the default http/https ports, add `hostPort` directives to its deployment template.
@@ -266,6 +265,10 @@ Congratulations, if the last command worked, you now have kubernetes running in 
        name: https
        protocol: TCP
      ```
+
+     Because we are skipping the `ingress-nginx` service, you should also remove `--publish-service=$(POD_NAMESPACE)/ingress-nginx`
+     from the arguments to `nginx-ingress-controller`.
+
 
 2. Disable leader election for control plane components, because this it is obsolete for a single node deployment.
    ```bash
