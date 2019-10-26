@@ -113,10 +113,10 @@ Below, some commands will need to be executed inside the lxc container and other
    @ add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
    @ add-apt-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
    @ apt-get update
-   @ apt-get install -y docker-ce=18.06.1~ce~3-0~debian kubelet kubeadm kubectl
+   @ apt-get install -y docker-ce kubelet kubeadm kubectl
    @ apt-mark hold kubelet kubeadm kubectl docker-ce
    ```
-   Note: newer versions of docker require `/lib/modules` from the host to be mounted, so we use an older version here.
+
 4. Configure the kubelet in the lxc container:
    ```bash
    @ kubeadm init --ignore-preflight-errors=FileContent--proc-sys-net-bridge-bridge-nf-call-iptables
