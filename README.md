@@ -102,6 +102,13 @@ Below, some commands will need to be executed inside the lxc container and other
    ```bash
    @ echo 'L /dev/kmsg - - - - /dev/console' > /etc/tmpfiles.d/kmsg.conf
    ```
+   This solution can cause infinite CPU usage in some cases; some(?) versions of
+   `systemd-journald` read from `/dev/kmsg` and write to `/dev/console`, and if
+   they're symlinked together, this will cause an infinite loop. If this affects
+   you, link `/dev/null` to `/dev/kmsg` instead:
+   ```bash
+   @ echo 'L /dev/kmsg - - - - /dev/null' > /etc/tmpfiles.d/kmsg.conf
+   ```
 
 3. Install docker and kubernetes runtime in the lxc container.
    The following commands add the required repositories, install kubernetes with dependencies, and pin the kubernetes & docker version:
