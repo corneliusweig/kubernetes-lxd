@@ -29,8 +29,8 @@ To use it, install lxd and initialize it using `lxd init`. When prompted, answer
 
 0. Before you can fire up your lxc container, you have to make sure to create `/etc/subuid` and `/etc/subgid` with the following entries:
 
-       root:1000000:1000000000
-       <youruserid>:1000000:1000000000
+       root:100000:1000000000
+       <youruserid>:100000:1000000000
 
    Run `systemctl restart lxd` to have LXD detect your new maps.
 
